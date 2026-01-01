@@ -30,12 +30,13 @@ api.interceptors.response.use(
 
 export default api
 
-// API Functions
+// API Functions add chenge password function here
 export const authApi = {
   login: (data: any) => api.post("/auth/login", data),
   forgetPassword: (data: any) => api.post("/auth/forget-password", data),
   verifyOtp: (data: any) => api.post("/auth/verify-otp", data),
   resetPassword: (data: any) => api.post("/auth/reset-password", data),
+  changePassword: (data: any) => api.patch("/auth/change-password", data),
 }
 
 export const dashboardApi = {

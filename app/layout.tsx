@@ -12,24 +12,12 @@ export const metadata: Metadata = {
   title: "iknowTennis Admin Dashboard",
   description: "Created with iknowTennis",
   generator: "iknowTennis",
-  // icons: {
-  //   icon: [
-  //     {
-  //       url: "/icon-light-32x32.png",
-  //       media: "(prefers-color-scheme: light)",
-  //     },
-  //     {
-  //       url: "/icon-dark-32x32.png",
-  //       media: "(prefers-color-scheme: dark)",
-  //     },
-  //     {
-  //       url: "/icon.svg",
-  //       type: "image/svg+xml",
-  //     },
-  //   ],
-  //   apple: "/apple-icon.png",
-  // },
-}
+  icons: {
+    icon: "/tennis-logo.png",
+    apple: "/tennis-logo.png",
+  },
+};
+
 
 export default function RootLayout({
   children,

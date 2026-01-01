@@ -1,64 +1,77 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { toast } from "sonner"
-import { Mail, Lock, Loader2 } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-const loginSchema = z.z.object({
+const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-})
+});
+
+type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  })
+    mode: "onSubmit",
+  });
 
-  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    setLoading(true)
+  const onSubmit = async (values: LoginValues) => {
+    setLoading(true);
     try {
       const result = await signIn("credentials", {
         redirect: false,
         email: values.email,
         password: values.password,
-      })
+      });
 
       if (result?.error) {
-        toast.error("Invalid credentials")
+        toast.error("Invalid credentials");
       } else {
-        toast.success("Login successful")
-        router.push("/dashboard")
+        toast.success("Login successful");
+        router.push("/dashboard");
       }
-    } catch (error) {
-      toast.error("An error occurred")
+    } catch {
+      toast.error("An error occurred");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold">Login To Your Account</h1>
-          <p className="text-muted-foreground">Please enter your email and password to continue</p>
+          <p className="text-muted-foreground">
+            Please enter your email and password to continue
+          </p>
         </div>
 
         <Form {...form}>
@@ -72,7 +85,12 @@ export default function LoginPage() {
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input placeholder="Email" className="pl-10" {...field} />
+                      <Input
+                        placeholder="Email"
+                        className="pl-10"
+                        autoComplete="email"
+                        {...field}
+                      />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -89,7 +107,27 @@ export default function LoginPage() {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input type="password" placeholder="Password" className="pl-10" {...field} />
+
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        className="pl-10 pr-10"
+                        autoComplete="current-password"
+                        {...field}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -98,7 +136,11 @@ export default function LoginPage() {
             />
 
             <div className="flex justify-end">
-              <Link href="/forgot-password" title="Forgot Password?" className="text-sm text-primary hover:underline">
+              <Link
+                href="/forgot-password"
+                title="Forgot Password?"
+                className="text-sm text-primary hover:underline"
+              >
                 Forgot Password?
               </Link>
             </div>
@@ -110,5 +152,5 @@ export default function LoginPage() {
         </Form>
       </div>
     </div>
-  )
+  );
 }
