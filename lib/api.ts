@@ -40,7 +40,10 @@ export const authApi = {
 }
 
 export const dashboardApi = {
-  getOverview: () => api.get("/dashboard/overview").then((res) => res.data),
+  getOverview: (range?: string) => {
+    const query = range ? `?range=${encodeURIComponent(range)}` : ""
+    return api.get(`/dashboard/overview${query}`).then((res) => res.data)
+  },
   getUsers: (page = 1, limit = 10) =>
     api.get(`/dashboard/user-list?page=${page}&limit=${limit}`).then((res) => res.data),
   getRanking: (page = 1, limit = 10) =>

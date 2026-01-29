@@ -140,8 +140,8 @@ export default function JokesPage() {
                     src={joke.imageUrl || "/placeholder.svg?height=200&width=400"}
                     alt="Joke"
                     width={500}
-                    height={200}
-                    className="w-full h-full transition-transform duration-300 group-hover:scale-110"
+                    height={500}
+                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute top-3 right-3">
                     <DropdownMenu>
