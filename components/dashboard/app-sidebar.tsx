@@ -41,6 +41,7 @@ const items = [
   { title: "User List", url: "/dashboard/users", icon: Users },
   { title: "Category List", url: "/dashboard/category", icon: Layers },
   { title: "Quiz Organizer", url: "/dashboard/quizzes", icon: BookOpen },
+  { title: "Jokes", url: "/dashboard/jokes", icon: BookOpen },
   { title: "Subscription", url: "/dashboard/subscription", icon: CreditCard },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];

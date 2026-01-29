@@ -80,3 +80,17 @@ export const userApi = {
   getProfile: (id: string) => api.get(`/user/${id}`).then((res) => res.data),
   updateProfile: (data: any) => api.put("/user/profile", data),
 }
+
+export const jokeApi = {
+  getAll: (page = 1, limit = 10) =>
+    api.get(`/joke?page=${page}&limit=${limit}`).then((res) => res.data),
+  create: (data: any) => {
+    const config = data instanceof FormData ? { headers: { "Content-Type": "multipart/form-data" } } : {}
+    return api.post("/joke", data, config)
+  },
+  update: (id: string, data: any) => {
+    const config = data instanceof FormData ? { headers: { "Content-Type": "multipart/form-data" } } : {}
+    return api.put(`/joke/${id}`, data, config)
+  },
+  delete: (id: string) => api.delete(`/joke/${id}`),
+}
