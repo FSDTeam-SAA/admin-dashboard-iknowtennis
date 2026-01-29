@@ -36,7 +36,7 @@ export default function DashboardOverview() {
   const [range, setRange] = useState<RangeKey>("daily")
   const [filterOpen, setFilterOpen] = useState(false)
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["dashboard-overview", range],
     queryFn: () => dashboardApi.getOverview(range),
   })
@@ -47,27 +47,70 @@ export default function DashboardOverview() {
   )
 
   if (isLoading) return <DashboardSkeleton />
+  if (isError) {
+    return (
+      <Card className="border-none shadow-sm">
+        <CardHeader>
+          <CardTitle>Unable to load dashboard</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <p>There was a problem fetching the latest dashboard data.</p>
+          <p className="text-xs">{error instanceof Error ? error.message : "Unknown error"}</p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const overview = data?.data
+
+  if (!overview) {
+    return (
+      <Card className="border-none shadow-sm">
+        <CardHeader>
+          <CardTitle>No dashboard data</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <p>The dashboard API returned no data.</p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Reload
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   const stats = [
-    { label: "Total User", value: data.data.cards.totalUsers, icon: Users, color: "bg-blue-100 text-blue-600" },
-    { label: "Total Quizzes", value: data.data.cards.totalQuizzes, icon: BookOpen, color: "bg-blue-200 text-blue-700" },
+    { label: "Total User", value: overview.cards?.totalUsers ?? 0, icon: Users, color: "bg-blue-100 text-blue-600" },
+    {
+      label: "Total Quizzes",
+      value: overview.cards?.totalQuizzes ?? 0,
+      icon: BookOpen,
+      color: "bg-blue-200 text-blue-700",
+    },
     {
       label: "Active Subscription",
-      value: data.data.cards.activeSubscriptions,
+      value: overview.cards?.activeSubscriptions ?? 0,
       icon: CheckCircle,
       color: "bg-purple-100 text-purple-600",
     },
     {
       label: "Total Revenue",
-      value: `$${data.data.cards.totalRevenueEstimateMonthly}`,
+      value: `$${overview.cards?.totalRevenueEstimateMonthly ?? 0}`,
       icon: TrendingUp,
       color: "bg-orange-100 text-orange-600",
     },
   ]
 
+  const quizAttendance = overview.quizAttendance?.byWeekday ?? []
+  const surveySubscription = overview.surveySubscription
+  const userJoiningOverview = overview.userJoiningOverview?.byMonth ?? []
+
   const pieData = [
-    { name: "Free", value: data.data.surveySubscription.freeUsers, color: "hsl(var(--chart-2))" },
-    { name: "Premium", value: data.data.surveySubscription.premiumUsers, color: "hsl(var(--chart-1))" },
+    { name: "Free", value: surveySubscription?.freeUsers ?? 0, color: "hsl(var(--chart-2))" },
+    { name: "Premium", value: surveySubscription?.premiumUsers ?? 0, color: "hsl(var(--chart-1))" },
   ]
 
   const applyRange = (next: RangeKey) => {
@@ -169,13 +212,13 @@ export default function DashboardOverview() {
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.data.quizAttendance.byWeekday}>
+              <BarChart data={quizAttendance}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                 <Tooltip />
                 <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40}>
-                  {data.data.quizAttendance.byWeekday.map((entry: any, index: number) => (
+                  {quizAttendance.map((entry: any, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={index === 4 ? "hsl(var(--primary))" : index % 2 === 0 ? "#FFD66B" : "#A5C2FF"}
@@ -206,11 +249,11 @@ export default function DashboardOverview() {
             <div className="flex gap-4 mt-4 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-[hsl(var(--chart-2))]" />
-                <span>Free: {data.data.surveySubscription.freeUsers}</span>
+                <span>Free: {surveySubscription?.freeUsers ?? 0}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-[hsl(var(--chart-1))]" />
-                <span>Premium: {data.data.surveySubscription.premiumUsers}</span>
+                <span>Premium: {surveySubscription?.premiumUsers ?? 0}</span>
               </div>
             </div>
           </CardContent>
@@ -223,7 +266,7 @@ export default function DashboardOverview() {
         </CardHeader>
         <CardContent className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data.data.userJoiningOverview.byMonth}>
+            <AreaChart data={userJoiningOverview}>
               <defs>
                 <linearGradient id="colorJoined" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
